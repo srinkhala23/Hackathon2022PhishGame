@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -91,6 +91,28 @@
             /* Sort of an arbitrary number; adjust to your liking */
             font-size: 18px;
         }
+        .base-timer__path-remaining {
+          /* Just as thick as the original ring */
+          stroke-width: 7px;
+
+          /* Rounds the line endings to create a seamless circle */
+          stroke-linecap: round;
+
+          /* Makes sure the animation starts at the top of the circle */
+          transform: rotate(90deg);
+          transform-origin: center;
+
+          /* One second aligns with the speed of the countdown timer */
+          transition: 1s linear all;
+
+          /* Allows the ring to change color when the color value updates */
+          stroke: currentColor;
+        }
+
+        .base-timer__svg {
+          /* Flips the svg and makes the animation to move left-to-right */
+          transform: scaleX(-1);
+        }
     </style>
 </head>
 <body onload="setupGame()">
@@ -114,18 +136,20 @@
         var myGamePiece;
         let arr = [0, 0, 0, 0, 1, 0, 1, 0];
         let timerInterval = null;
-        var protocol = location.protocol;
-        var slashes = protocol.concat("//");
-        var host = slashes.concat(window.location.host);
-        
-        
+        const COLOR_CODES = {
+          info: {
+            color: "green"
+          }
+        };
+
+        let remainingPathColor = COLOR_CODES.info.color;
         function setupGame()
         {
             console.log("setupGame");
             socket.emit('newPlayer');
             myScore = new component("30px", "Calibri", "black", 920, 750, "text");
-            myGamePiece = new component(1100, 800, host + "/photo/phish1.png", 0, 0, "image");
-            myGamePiece1 = new component(40, 40, host + "/photo/happ1.png", 860, 720, "image");
+            myGamePiece = new component(1100, 800, "http://localhost:3000/photo/phish1.png", 0, 0, "image");
+            myGamePiece1 = new component(40, 40, "http://localhost:3000/photo/happ1.png", 860, 720, "image");
             myGameArea.start();
         }
         
@@ -273,7 +297,7 @@
                     myScore.color = "white";
                     myScore.width = "25px";
                 }
-                var img = host + "/photo/" + "phish" + myGameArea.frameNo + ".PNG";
+                var img = "http://localhost:3000/photo/" + "phish" + myGameArea.frameNo + ".PNG";
                 myGamePiece.image.src = img;
                 myScore.text = "SCORE: " + score;
                 myGamePiece.update();
@@ -289,12 +313,13 @@
             if (myGameArea.frameNo <= 8) {
                 if (arr[myGameArea.frameNo - 1] == 0) {
                     score = score + 10;
-                    myGamePiece1.image.src = host + "/photo/happ1.png";
+                    myGamePiece1.image.src = "http://localhost:3000/photo/happ1.png";
                 }
                 else {
-                    myGamePiece1.image.src = host + "/photo/sad1.png";
+                    score = score - 10;
+                    myGamePiece1.image.src = "http://localhost:3000/photo/sad1.png";
                 }
-                socket.emit('chat message', "SCORE " + score);
+                socket.emit('chat message', "SCORE " + score + " " + document.getElementById("base-timer-label").innerHTML);
             }
             myGameArea.frameNo += 1;
             updateGameArea();
@@ -304,12 +329,13 @@
             if (myGameArea.frameNo <= 8) {
                 if (arr[myGameArea.frameNo - 1] == 1) {
                     score = score + 10;
-                    myGamePiece1.image.src = host + "/photo/happ1.png";
+                    myGamePiece1.image.src = "http://localhost:3000/photo/happ1.png";
                 }
                 else {
-                    myGamePiece1.image.src = host + "/photo/sad1.png";
+                    score = score - 10;
+                    myGamePiece1.image.src = "http://localhost:3000/photo/sad1.png";
                 }
-                socket.emit('chat message', "SCORE " + score);
+                socket.emit('chat message', "SCORE " + score + " " + document.getElementById("base-timer-label").innerHTML);
             }
             myGameArea.frameNo += 1;
             updateGameArea();
@@ -335,7 +361,7 @@
         }
 
         function check() {
-            myGamePiece1.image.src = host + "/photo/R.png";
+            myGamePiece1.image.src = "http://localhost:3000/photo/R.png";
         }
 
         function formatTime(time) {
@@ -364,7 +390,7 @@
             var item = document.createElement('li');
             item.textContent = msg;
             messages.appendChild(item);
-            //window.scrollTo(0, document.body.scrollHeight);
+            window.scrollTo(0, document.body.scrollHeight);
             }
           });
           
@@ -416,6 +442,17 @@
             <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                 <g class="base-timer__circle">
                     <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45" />
+                    <!--<path
+                        id="base-timer-path-remaining"
+                        stroke-dasharray="283"
+                        class="base-timer__path-remaining ${remainingPathColor}"
+                        d="
+                          M 50, 50
+                          m -45, 0
+                          a 45,45 0 1,0 90,0
+                          a 45,45 0 1,0 -90,0
+                        "
+                      ></path>-->
                 </g>
             </svg>
             <span id="base-timer-label" class="base-timer__label">
