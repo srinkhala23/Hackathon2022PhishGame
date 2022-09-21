@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/9fa6d25d-3ebc-480a-bfa8-32a87e00296e/AppServices/subscriptions/9fa6d25d-3ebc-480a-bfa8-32a87e00296e/resourceGroups/PlentyOfPhishAppTest-rg/providers/Microsoft.Web/sites/PlentyOfPhishAppTest",
+    "appService.deploySubpath": "."
+}

@@ -1,0 +1,398 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        canvas {
+            border: 1px solid #d3d3d3;
+            background-color: #f1f1f1;
+        }
+        .button {
+            padding: 15px 25px;
+            font-size: 24px;
+            text-align: center;
+            cursor: pointer;
+            outline: none;
+            color: #fff;
+            background-color: #04AA6D;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 9px #999;
+        }
+
+        .button1:hover {
+                background-color: #3e8e41
+        }
+
+        .button1:active {
+                background-color: #3e8e41;
+                box-shadow: 0 5px #666;
+                transform: translateY(4px);
+        }
+
+        .button2:hover {
+            background-color: #036281;
+        }
+
+        .button2:active {
+            background-color: #036281;
+            box-shadow: 0 5px #666;
+            transform: translateY(4px);
+        }
+
+        .button1 {
+            background-color: #4CAF50;
+        }
+        /* Green */
+        .button2 {
+            background-color: #008CBA;
+        }
+        /* Blue */
+        /* Sets the containers height and width */
+        .base-timer {
+            position: absolute;
+            height: 50px;
+            width: 50px;
+        }
+
+        /* Removes SVG styling that would hide the time label */
+        .base-timer__circle {
+            fill: none;
+            stroke: none;
+        }
+
+        /* The SVG path that displays the timer's progress */
+        .base-timer__path-elapsed {
+            stroke-width: 7px;
+            stroke: grey;
+        }
+        .base-timer__label {
+            position: absolute;
+            /* Size should match the parent container */
+            width: 50px;
+            height: 50px;
+            /* Keep the label aligned to the top */
+            top: 0;
+            /* Create a flexible box that centers content vertically and horizontally */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Sort of an arbitrary number; adjust to your liking */
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body onload="startGame()">
+    <!--<img id="scream" width="220" height="277"
+         src="phish.PNG" alt="The Scream">
+    <img id="scream1" width="220" height="277"
+         src="phish2.PNG" alt="The Scream new">-->
+    <script>
+        //var phishBtn;
+        //var NotphishBtn;
+        // Start with an initial value of 20 seconds
+        const TIME_LIMIT = 20;
+
+        // Initially, no time has passed, but this will count up
+        // and subtract from the TIME_LIMIT
+        let timePassed = 0;
+        let timeLeft = TIME_LIMIT;
+        var myScore;
+        var score;
+        var myGamePiece;
+        let arr = [0, 0, 0, 0, 1, 0, 1, 0];
+
+        let timerInterval = null;
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+
+                // The amount of time passed increments by one
+                timePassed = timePassed += 1;
+                timeLeft = TIME_LIMIT - timePassed;
+
+                // The time left label is updated
+                document.getElementById("base-timer-label").innerHTML = formatTime(timePassed);
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function startGame() {
+            //phishBtn = new component(100, 100, "grey", 20, 700);
+            //NotphishBtn = new component(100, 100, "grey", 900, 700);
+            //startTimer();
+            myScore = new component("30px", "Consolas", "black", 920, 750, "text");
+            myGamePiece = new component(1100, 800, "phish1.PNG", 0, 0, "image");
+            myGamePiece1 = new component(40, 40, "smiley.gif", 860, 720, "image");
+            document.getElementById("base-timer-label").innerHTML = "0:00"
+            myGameArea.start();
+        }
+
+        var myGameArea = {
+            canvas: document.createElement("canvas"),
+            start: function () {
+                this.canvas.width = 1100;
+                this.canvas.height = 800;
+                this.context = this.canvas.getContext("2d");
+                document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+                //var img = document.getElementById("scream");
+                //this.context.drawImage(img, 5, 5);
+                this.interval = setInterval(updateGameArea, 20);
+                //myGamePiece.image.src = "phish2.PNG";
+                //myGamePiece.update();
+                document.getElementById("button1").style.display = 'none';
+                document.getElementById("button2").style.display = 'none';
+                score = 0;
+                this.frameNo = 0;
+                
+
+                /* window.addEventListener('mousedown', function (e) {
+                     myGameArea.x = e.pageX;
+                     myGameArea.y = e.pageY;
+                 })
+                 window.addEventListener('mouseup', function (e) {
+                     myGameArea.x = false;
+                     myGameArea.y = false;
+                 })
+                 window.addEventListener('touchstart', function (e) {
+                     myGameArea.x = e.pageX;
+                     myGameArea.y = e.pageY;
+                 })
+                 window.addEventListener('touchend', function (e) {
+                     myGameArea.x = false;
+                     myGameArea.y = false;
+                 })*/
+            },
+            clear: function () {
+                this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+        }
+
+        function component(width, height, color, x, y, type) {
+            this.type = type;
+            if (this.type == "image") {
+                this.image = new Image();
+                this.image.src = color;
+            }
+            this.width = width;
+            this.height = height;
+            this.x = x;
+            this.y = y;
+            this.color = color;
+            this.update = function () {
+                ctx = myGameArea.context;
+                if (this.type == "text") {
+                    console.log("I m text" + this.text);
+                    ctx.font = this.width + " " + this.height;
+                    ctx.fillStyle = this.color;
+                    ctx.fillText(this.text, this.x, this.y);
+                    ctx.fil
+                } else if (this.type == "image") {
+                    console.log("I m image" + this.image.src);
+                    ctx.drawImage(this.image,
+                        this.x,
+                        this.y,
+                        this.width, this.height);
+                } else {
+                    console.log("I m nothing")
+                    ctx.fillStyle = color;
+                    ctx.fillRect(this.x, this.y, this.width, this.height);
+                }
+            }
+            /*this.clicked = function () {
+                var myleft = this.x;
+                var myright = this.x + (this.width);
+                var mytop = this.y;
+                var mybottom = this.y + (this.height);
+                var clicked = true;
+                if ((mybottom < myGameArea.y) || (mytop > myGameArea.y) || (myright < myGameArea.x) || (myleft > myGameArea.x)) {
+                    clicked = false;
+                }
+                return clicked;
+            }*/
+        }
+
+        function updateGameArea() {
+            myGameArea.clear();
+            //var random = getRandomNumber(0, 1)
+            if (myGameArea.frameNo == 0) {
+                myScore.text = "Select which of these mails are phishing mails and which ones are not!";
+                myScore.x = 100;
+                myScore.y = 400;
+                myScore.color = "black";
+                myScore.width = "25px";
+                //myGamePiece.update();
+                //myGamePiece.update();
+                myScore.update();
+            }
+            else if (myGameArea.frameNo > 8) {
+                console.log("game completed");
+                stopTimer();
+                //myGameArea.frameNo = myGameArea.frameNo % 8;
+                myScore.text = 'GAME OVER!! SCORE: ' + score;
+                myScore.x = 250;
+                myScore.y = 400;
+                myScore.color = "black";
+                myScore.width = "50px";
+                //myGamePiece.update();
+                //myGamePiece.update();
+                myScore.update();
+                document.getElementById("button1").style.display = 'none';
+                document.getElementById("button2").style.display = 'none';
+                document.getElementById("startbutton").textContent = 'Challenge';
+                document.getElementById("startbutton").style.display = 'inline';
+            }
+            else {
+                if (myScore.color == "black") {
+                    myScore.x = 920;
+                    myScore.y = 750;
+                    myScore.color = "white";
+                    myScore.width = "25px";
+                }
+                var img = "phish" + myGameArea.frameNo + ".PNG";
+                console.log("frame" + myGameArea.frameNo + " img" + img);
+                myGamePiece.image.src = img;
+                /*switch (myGameArea.frameNo) {
+                    case 1:
+                        myGamePiece.image.src = "phish1.PNG";
+                        break;
+                    case 2:
+                        myGamePiece.image.src = "phish2.PNG";
+                        break;
+                    case 3:
+                        myGamePiece.image.src = "phish3.PNG";
+                        break;
+                    case 4:
+                        myGamePiece.image.src = "phish4.PNG";
+                        break;
+                    case 5:
+                        myGamePiece.image.src = "phish5.PNG";
+                        break;
+                    case 6:
+                        myGamePiece.image.src = "phish6.PNG";
+                        break;
+                    case 7:
+                        myGamePiece.image.src = "phish7.PNG";
+                        break;
+                }*/
+                /*if (myGameArea.frameNo%2 == 1) {
+                    //var img = document.getElementById("scream1");
+                    myGamePiece.image.src = "phish2.PNG";
+                    //myGameArea.context.drawImage(img, 5, 5);
+                }
+                else {
+                    //var img = document.getElementById("scream");
+                    myGamePiece.image.src = "phish1.PNG";
+                    //myGameArea.context.drawImage(img, 5, 5);
+                }*/
+                //var img = document.getElementById("scream1");
+                //myGameArea.context.drawImage(img, 5, 5);
+                /*if (myGameArea.x && myGameArea.y) {
+                    if (phishBtn.clicked()) {
+                        score = score + 10;
+                        var img = document.getElementById("scream1");
+                        myGameArea.context.drawImage(img, 5, 5);
+                    }
+                    if (NotphishBtn.clicked()) {
+                        score = score + 10;
+                        var img = document.getElementById("scream");
+                        myGameArea.context.drawImage(img, 5, 5);
+                    }
+                }*/
+                console.log("score" + score)
+                myScore.text = "SCORE: " + score;
+                myGamePiece.update();
+                //myGamePiece.update();
+                myGamePiece1.update();
+                myScore.update();
+            }
+            //phishBtn.update();
+            //NotphishBtn.update();
+        }
+        function reportphish() {
+            if (myGameArea.frameNo <= 8) {
+                if (arr[myGameArea.frameNo - 1] == 0) {
+                    score = score + 10;
+                    myGamePiece1.image.src = "happ1.png";
+                }
+                else {
+                    console.log("bad choice");
+                    myGamePiece1.image.src = "sad1.png";
+                }
+            }
+            myGameArea.frameNo += 1;
+            updateGameArea();
+        }
+
+        function reportnotphish() {
+            if (myGameArea.frameNo <= 8) {
+                if (arr[myGameArea.frameNo - 1] == 1) {
+                    score = score + 10;
+                    myGamePiece1.image.src = "happ1.png";
+                }
+                else {
+                    console.log("bad choice");
+                    myGamePiece1.image.src = "sad1.png";
+                }
+            }
+            myGameArea.frameNo += 1;
+            updateGameArea();
+        }
+
+        function startgame() {
+            if (document.getElementById("startbutton").textContent == "Challenge") {
+                return;
+            }
+            startTimer();
+            document.getElementById("button1").style.display = 'inline';
+            document.getElementById("button2").style.display = 'inline';
+            document.getElementById("startbutton").style.display = 'none';
+            myGameArea.frameNo = 1;
+            myGameArea.interval = setInterval(updateGameArea, 10);
+        }
+
+        function getRandomNumber(minRange, maxRange) {
+            return Math.floor(Math.random() * (maxRange + 1) + minRange);
+        }
+
+        function check() {
+            myGamePiece1.image.src = "R.png";
+        }
+
+        function formatTime(time) {
+            // The largest round integer less than or equal to the result of time divided being by 60.
+            const minutes = Math.floor(time / 60);
+
+            // Seconds are the remainder of the time divided by 60 (modulus operator)
+            let seconds = time % 60;
+
+            // If the value of seconds is less than 10, then display seconds with a leading zero
+            if (seconds < 10) {
+                seconds = `0${seconds}`;
+            }
+
+            // The output in MM:SS format
+            return `${minutes}:${seconds}`;
+        }
+    </script>
+    <div style="text-align:right;width:800px;">
+
+        <div class="base-timer">
+            <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <g class="base-timer__circle">
+                    <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45" />
+                </g>
+            </svg>
+            <span id="base-timer-label" class="base-timer__label">
+                ${formatTime(timePassed)}
+            </span>
+            <button id ="startbutton" onclick="startgame()" style="font-size:20px">Start</button>
+        </div>
+        <button id="button1" class="button button1" onmousedown="check()" onmouseup="reportphish()">PHISH</button>
+        <button id="button2" class="button button2" onmousedown="check()" onmouseup="reportnotphish()">NOT PHISH</button>
+    </div>
+</body>
+</html>
