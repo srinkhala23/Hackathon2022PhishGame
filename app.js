@@ -11,6 +11,7 @@ const gameState = {
 var numplayers = 0;
 var port = process.env.PORT || 3000; 
 
+
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
 });
@@ -31,11 +32,16 @@ io.on('connection', (socket) => {
   socket.on('chat message', (msg) => {
     console.log('message: ' + msg);
     if (msg == "START") {
+        gameState.players[socket.id].score = 0;
+        gameState.players[socket.id].time = 0;
         io.emit('chat message', msg);
+        io.emit('chat message', "Player" + gameState.players[socket.id].num + ": " + "Started the game for all");
+        io.sockets.emit('state', gameState);
     }
     else if (msg.startsWith("SCORE")) {
         const myArray = msg.split(" ");
         gameState.players[socket.id].score = myArray[1];
+        gameState.players[socket.id].time = myArray[2];
         io.sockets.emit('state', gameState);
     }
     else if (msg.startsWith("END")) {
@@ -43,8 +49,9 @@ io.on('connection', (socket) => {
         gameState.players[socket.id].score = myArray[1];
         gameState.players[socket.id].time = myArray[2];
         io.sockets.emit('state', gameState);
+        io.sockets.emit('chat message', "Player" + gameState.players[socket.id].num + ": " + "Completed");
     } else {
-        io.emit('chat message', msg);
+        io.emit('chat message', "Player" + gameState.players[socket.id].num + ": " + msg);
     }
   });
    socket.on('newPlayer', () => {
@@ -56,18 +63,22 @@ io.on('connection', (socket) => {
     height: 25,
     num: numplayers,
     score: 0,
-    time: 0
+    time: 0,
+    state: 0
   };
   io.sockets.emit('new', gameState);
+  io.sockets.emit('chat message', "Player" + gameState.players[socket.id].num + ": " + "Joined");
   });
   socket.on('disconnect', () => {
     console.log('user disconnected' + numplayers);
     numplayers = numplayers - 1;
+    io.sockets.emit('chat message', "Player" + gameState.players[socket.id].num + ": " + "Disconnected");
     delete gameState.players[socket.id];
     io.sockets.emit('state', gameState);
+    
   });
 });
 
-server.listen(port, () => {
+server.listen(3000, () => {
   console.log('listening on *:3000');
 });
