@@ -10,7 +10,7 @@ const gameState = {
 };
 var numplayers = 0;
 var port = process.env.PORT || 3000; 
-
+var names = ['Steve', 'Harry', 'Ravi', 'Mahi', 'Guru', 'Micheal', 'Jack', 'Rama', 'Srin', 'Loki', 'Clare', 'Lord'];
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
@@ -56,12 +56,14 @@ io.on('connection', (socket) => {
   });
    socket.on('newPlayer', () => {
     console.log(numplayers);
+    var rA = Math.floor(Math.random()*names.length);
+    var name = names.splice(rA,1);
     gameState.players[socket.id] = {
     x: 250,
     y: (500 + 30 * numplayers),
     width: 25,
     height: 25,
-    num: numplayers,
+    num: name,
     score: 0,
     time: 0,
     state: 0
@@ -73,6 +75,8 @@ io.on('connection', (socket) => {
     console.log('user disconnected' + numplayers);
     numplayers = numplayers - 1;
     io.sockets.emit('chat message', "Player" + gameState.players[socket.id].num + ": " + "Disconnected");
+    io.sockets.emit('undraw', gameState.players[socket.id]);
+    names.push(gameState.players[socket.id].num);
     delete gameState.players[socket.id];
     io.sockets.emit('state', gameState);
     
