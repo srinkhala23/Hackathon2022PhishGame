@@ -294,7 +294,7 @@
                 else {
                     myGamePiece1.image.src = host + "/photo/sad1.png";
                 }
-                socket.emit('chat message', "SCORE " + score);
+                socket.emit('chat message', "SCORE " + score + " " + document.getElementById("base-timer-label").innerHTML);
             }
             myGameArea.frameNo += 1;
             updateGameArea();
@@ -309,7 +309,7 @@
                 else {
                     myGamePiece1.image.src = host + "/photo/sad1.png";
                 }
-                socket.emit('chat message', "SCORE " + score);
+                socket.emit('chat message', "SCORE " + score + " " + document.getElementById("base-timer-label").innerHTML);
             }
             myGameArea.frameNo += 1;
             updateGameArea();
@@ -375,6 +375,10 @@
           }
         });
         
+        socket.on('undraw', (player) => {
+          
+            undrawPlayer(player);
+        });
         socket.on('state', (gameState) => {
             var ul = document.getElementById("list");
             ul.innerHTML = '';
@@ -395,6 +399,13 @@
           ctx.font = "25px" + " " + "Calibri";
           //ctx.fillStyle = "black";
           ctx.fillText("Player:" + player.num + " Joined", player.x + 2*player.width, player.y + player.height-5);
+          ctx.closePath();
+        };
+	
+	 const undrawPlayer = (player) => {
+          ctx = myGameArea.context; 
+          ctx.beginPath();
+          ctx.clearRect(player.x, player.y, myGameArea.canvas.width, player.height);
           ctx.closePath();
         };
         
