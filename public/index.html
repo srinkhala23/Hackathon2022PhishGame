@@ -112,7 +112,9 @@
         var score;
         var socket = io();
         var myGamePiece;
-        let arr = [0, 0, 0, 0, 1, 0, 1, 0];
+        let arr = [1, 1, 0, 1, 0, 0, 0, 1, 1, 0];
+        let reviewIncorrectAns = new Array();
+        let toReview = false;
         let timerInterval = null;
         var protocol = location.protocol;
         var slashes = protocol.concat("//");
@@ -144,6 +146,7 @@
         function stopTimer() {
             clearInterval(timerInterval);
             clearInterval(myGameArea.interval);
+            timePassed = 0;
         }
 
         var myGameArea = {
@@ -158,6 +161,9 @@
                 document.getElementById("button2").style.display = 'none';
                 document.getElementById("timer").style.display = 'inline';
                 document.getElementById("base-timer-label").innerHTML = "0:00"        
+				        document.getElementById("Next").style.display = 'none';
+                document.getElementById("Previous").style.display = 'none';
+                document.getElementById("reviewButton").style.display = 'none';
                 score = 0;
                 this.frameNo = 0;
                 drawBanner();
@@ -234,6 +240,51 @@
             }*/
         }
 
+        function updateReviewArea() {
+            console.log("Inside updatereviewarea");
+            myGameArea.clear();
+            console.log("frame no. + " + myGameArea.frameNo);
+            if (myGameArea.frameNo == 0)
+            {
+                myScore.text = "You marked bunch of Phish mails as Not Phish. Lets learn!";
+                myScore.x = 100;
+                myScore.y = 300;
+                myScore.color = "black";
+                myScore.width = "25px";
+                myScore.height = "Calibri Light";
+                myScore.update();
+                document.getElementById("Previous").style.display = 'none';
+           }
+            else if (myGameArea.frameNo < reviewIncorrectAns.length) {
+                document.getElementById("Previous").style.display = 'inline';
+                myGamePiece.update();
+            }
+            else {
+                toReview = false;
+                myGameArea.frameNo = 11;
+                document.getElementById("Previous").style.display = 'none';
+                document.getElementById("Next").style.display = 'none';
+                myGameArea.clear();
+                stopTimer();
+                //myGameArea.frameNo = myGameArea.frameNo % 8;
+                myScore.text = "REVIEW OVER!!";
+                myScore.x = 250;
+                myScore.y = 400;
+                myScore.color = "black";
+                myScore.width = "50px";
+                //myGamePiece.update();
+                //myGamePiece.update();
+                myScore.update();
+                document.getElementById("button1").style.display = 'none';
+                document.getElementById("button2").style.display = 'none';
+                document.getElementById("startbutton").textContent = 'Restart';
+                document.getElementById("startbutton").style.display = 'inline';
+                if (reviewIncorrectAns.length !=0)
+                    document.getElementById("reviewButton").style.display = 'inline';
+                toReview = true;
+            }
+        }
+
         function updateGameArea() {
             
             if (myGameArea.frameNo == 0) {
@@ -247,7 +298,7 @@
                 //myGamePiece.update();
                 myScore.update();
             }
-            else if (myGameArea.frameNo > 8) {
+            else if (myGameArea.frameNo > 10) {
                 myGameArea.clear();
                 stopTimer();
                 //myGameArea.frameNo = myGameArea.frameNo % 8;
@@ -262,8 +313,11 @@
                 myScore.update();
                 document.getElementById("button1").style.display = 'none';
                 document.getElementById("button2").style.display = 'none';
-                document.getElementById("startbutton").textContent = 'Challenge';
+                document.getElementById("startbutton").textContent = 'Restart';
                 document.getElementById("startbutton").style.display = 'inline';
+                if (reviewIncorrectAns.length !=0)
+                    document.getElementById("reviewButton").style.display = 'inline';
+                toReview = true;
             }
             else {
                 myGameArea.clear();
@@ -286,33 +340,38 @@
         }
         
         function reportphish() {
-            if (myGameArea.frameNo <= 8) {
+            if (myGameArea.frameNo <= 10) {
                 if (arr[myGameArea.frameNo - 1] == 0) {
                     score = score + 10;
                     myGamePiece1.image.src = host + "/photo/happ1.png";
                 }
                 else {
+                    score = score - 10;
                     myGamePiece1.image.src = host + "/photo/sad1.png";
                 }
                 socket.emit('chat message', "SCORE " + score + " " + document.getElementById("base-timer-label").innerHTML);
             }
-            myGameArea.frameNo += 1;
+            
             updateGameArea();
+            myGameArea.frameNo += 1;
         }
 
         function reportnotphish() {
-            if (myGameArea.frameNo <= 8) {
+            if (myGameArea.frameNo <= 10) {
                 if (arr[myGameArea.frameNo - 1] == 1) {
                     score = score + 10;
                     myGamePiece1.image.src = host + "/photo/happ1.png";
                 }
                 else {
+                    score = score - 10;
+					reviewIncorrectAns.push(myGameArea.frameNo);
                     myGamePiece1.image.src = host + "/photo/sad1.png";
                 }
                 socket.emit('chat message', "SCORE " + score + " " + document.getElementById("base-timer-label").innerHTML);
             }
-            myGameArea.frameNo += 1;
+            
             updateGameArea();
+            myGameArea.frameNo += 1;
         }
 
         function startgame() {    
@@ -320,14 +379,46 @@
         }
         
         function mystart() {
-            if (document.getElementById("startbutton").textContent == "Challenge") {
-                return;
+            if (document.getElementById("startbutton").textContent == "Restart") {
+                myGameArea.start();
             }
             startTimer();
             document.getElementById("button1").style.display = 'inline';
             document.getElementById("button2").style.display = 'inline';
+            document.getElementById("reviewButton").style.display = 'none';
             document.getElementById("startbutton").style.display = 'none';
             myGameArea.frameNo = 1;
+        }
+
+        function reviewGame() {
+            console.log(reviewIncorrectAns.length);
+            stopTimer();
+            document.getElementById("reviewButton").style.display = 'none';
+            document.getElementById("startbutton").style.display = 'none';
+            document.getElementById("Next").style.display = 'inline';
+            
+            myGameArea.frameNo = 0;
+            myGameArea.interval = setInterval(updateReviewArea, 10);
+        }
+
+        function reviewNext() {
+            if (myGameArea.frameNo <= reviewIncorrectAns.length) {
+                var img = "reviewphish" + reviewIncorrectAns[myGameArea.frameNo] + ".PNG";
+                console.log("frame" + myGameArea.frameNo + " img " + img);
+                myGamePiece.image.src = "http://localhost:3000/photo/" + img;
+            }
+            myGameArea.frameNo += 1;
+            updateReviewArea();
+        }
+
+        function reviewPrevious() {
+            if (myGameArea.frameNo <= reviewIncorrectAns.length) {
+                var img = "reviewphish" + reviewIncorrectAns[myGameArea.frameNo] + ".PNG";
+                console.log("frame" + myGameArea.frameNo + " img " + img);
+                myGamePiece.image.src = "http://localhost:3000/photo/" + img;
+            }
+            myGameArea.frameNo -= 1;
+            updateReviewArea();
         }
 
         function getRandomNumber(minRange, maxRange) {
@@ -364,14 +455,14 @@
             var item = document.createElement('li');
             item.textContent = msg;
             messages.appendChild(item);
-            //window.scrollTo(0, document.body.scrollHeight);
+            window.scrollTo(0, document.body.scrollHeight);
             }
           });
           
         socket.on('new', (gameState) => {
           for (let player in gameState.players) {
             console.log("drawing player");
-            drawPlayer(gameState.players[player])
+            drawPlayer(gameState.players[player]);
           }
         });
         
@@ -417,7 +508,7 @@
           ctx.fill();
           ctx.font = "50px" + " " + "Calibri";
           ctx.fillStyle = "black";
-          ctx.fillText("Plenty of phish", 300, 75);
+          ctx.fillText("Spot the phish", 350, 75);
           ctx.closePath();
           }
           
@@ -432,12 +523,15 @@
             <span id="base-timer-label" class="base-timer__label">
                 ${formatTime(timePassed)}
             </span>
-            <button id ="startbutton" onclick="startgame()" style="font-size:20px">Start</button>
+            <button id="startbutton" onclick="startgame()" style="font-size:20px">Start</button>
+			      <button id="reviewButton" onclick="reviewGame()" style="font-size:20px">Review</button>
             <ul id="list">
             </ul>
     </div>
     
     <div style="text-align:right;width:800px;">
+        <button id="Next" class="button button1" onmousedown="check()" onmouseup="reviewNext()">Next</button>
+        <button id="Previous" class="button button2" onmousedown="check()" onmouseup="reviewPrevious()">Previous</button>
         <button id="button1" class="button button1" onmousedown="check()" onmouseup="reportphish()">PHISH</button>
         <button id="button2" class="button button2" onmousedown="check()" onmouseup="reportnotphish()">NOT PHISH</button>
         </div>
