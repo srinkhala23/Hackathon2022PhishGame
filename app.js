@@ -35,7 +35,7 @@ io.on('connection', (socket) => {
         gameState.players[socket.id].score = 0;
         gameState.players[socket.id].time = 0;
         io.emit('chat message', msg);
-        io.emit('chat message', "Player" + gameState.players[socket.id].num + ": " + "Started the game for all");
+        io.emit('chat message', "" + gameState.players[socket.id].num + ": " + "Started the game for all");
         io.sockets.emit('state', gameState);
     }
     else if (msg.startsWith("SCORE")) {
@@ -49,9 +49,9 @@ io.on('connection', (socket) => {
         gameState.players[socket.id].score = myArray[1];
         gameState.players[socket.id].time = myArray[2];
         io.sockets.emit('state', gameState);
-        io.sockets.emit('chat message', "Player" + gameState.players[socket.id].num + ": " + "Completed");
+        io.sockets.emit('chat message', "" + gameState.players[socket.id].num + ": " + "Completed");
     } else {
-        io.emit('chat message', "Player" + gameState.players[socket.id].num + ": " + msg);
+        io.emit('chat message', "" + gameState.players[socket.id].num + ": " + msg);
     }
   });
    socket.on('newPlayer', () => {
@@ -69,12 +69,12 @@ io.on('connection', (socket) => {
     state: 0
   };
   io.sockets.emit('new', gameState);
-  io.sockets.emit('chat message', "Player" + gameState.players[socket.id].num + ": " + "Joined");
+  io.sockets.emit('chat message', "Player:" + gameState.players[socket.id].num + " " + "Joined");
   });
   socket.on('disconnect', () => {
     console.log('user disconnected' + numplayers);
     numplayers = numplayers - 1;
-    io.sockets.emit('chat message', "Player" + gameState.players[socket.id].num + ": " + "Disconnected");
+    io.sockets.emit('chat message', "Player:" + gameState.players[socket.id].num + " " + "Disconnected");
     io.sockets.emit('undraw', gameState.players[socket.id]);
     names.push(gameState.players[socket.id].num);
     delete gameState.players[socket.id];
